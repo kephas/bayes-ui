@@ -3,6 +3,8 @@ module Probability exposing (KeyedProba(..), Msg, ProbaConversion(..), ProbaKey,
 import Dict exposing (Dict)
 import Element exposing (Element, el, text)
 import Element.Events as Ev
+import FormatNumber
+import FormatNumber.Locales
 
 
 type Probability
@@ -168,15 +170,28 @@ viewKeyedProba msgmap state kproba =
         |> Element.map msgmap
 
 
+customLocale =
+    let
+        locale =
+            FormatNumber.Locales.frenchLocale
+    in
+    { locale | decimals = FormatNumber.Locales.Max 3 }
+
+
+formatFloat : Float -> String
+formatFloat num =
+    FormatNumber.format customLocale num
+
+
 viewProba : Probability -> Element msg
 viewProba proba =
     text <|
         case proba of
             Proba p ->
-                String.fromFloat (p * 100) ++ "%"
+                formatFloat (p * 100) ++ "%"
 
             Odds for against ->
-                String.fromFloat for ++ ":" ++ String.fromFloat against
+                formatFloat for ++ ":" ++ formatFloat against
 
             Evidence e ->
                 String.fromInt e ++ "dB"
