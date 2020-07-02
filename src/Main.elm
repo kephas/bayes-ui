@@ -1,20 +1,26 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Cmd.Extra exposing (withNoCmd)
+import Dict
+import Element exposing (Element, column, el, layout, padding, spacing, text)
+import Html exposing (Html)
+import Probability as P
+
 
 
 ---- MODEL ----
 
 
 type alias Model =
-    {}
+    { probas : List P.KeyedProba
+    , probaViewState : P.ProbaViewState
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( { probas = [ P.KeyedProba "a" 0.9999, P.KeyedOdds "b" 10 1, P.KeyedEvidence "c" 33 ], probaViewState = P.emptyViewState }, Cmd.none )
 
 
 
@@ -22,12 +28,15 @@ init =
 
 
 type Msg
-    = NoOp
+    = ProbaMsg P.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        ProbaMsg submsg ->
+            withNoCmd <|
+                { model | probaViewState = P.update submsg model.probaViewState }
 
 
 
@@ -36,10 +45,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        ]
+    layout [ padding 20 ] <|
+        column [ spacing 10 ] <|
+            List.map (P.viewKeyedProba ProbaMsg model.probaViewState) model.probas
 
 
 
